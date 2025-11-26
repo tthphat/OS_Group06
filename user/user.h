@@ -22,6 +22,8 @@ int getpid(void);
 char* sbrk(int);
 int sleep(int);
 int uptime(void);
+struct sysinfo;              // forward declaration sysinfo struct
+int sysinfo(struct sysinfo *);   // New syscall prototype added sysinfo
 
 // ulib.c
 int stat(const char*, struct stat*);
