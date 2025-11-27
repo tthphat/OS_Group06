@@ -5,6 +5,8 @@
 #include "memlayout.h"
 #include "spinlock.h"
 #include "proc.h"
+#include "sysinfo.h" // Include sysinfo.h for struct sysinfo
+
 
 uint64
 sys_exit(void)
@@ -90,4 +92,23 @@ sys_uptime(void)
   xticks = ticks;
   release(&tickslock);
   return xticks;
+}
+
+// New syscall handler to get system info
+uint64
+sys_sysinfo(void)
+{
+    uint64 addr; // User pointer to struct sysinfo
+    struct sysinfo si; // Kernel copy of sysinfo
+    struct proc *p = myproc(); // Get current process
+
+    argaddr(0, &addr);
+
+    si.freemem = freemem();
+    si.nproc = nproc();
+
+    if(copyout(p->pagetable, addr, (char*)&si, sizeof(si)) < 0)
+        return -1;
+
+    return 0;
 }
