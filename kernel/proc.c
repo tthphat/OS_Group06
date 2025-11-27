@@ -20,6 +20,8 @@ static void freeproc(struct proc *p);
 
 extern char trampoline[]; // trampoline.S
 
+int nproc(void); // Declaration of nproc function
+
 // helps ensure that wakeups of wait()ing
 // parents are not lost. helps obey the
 // memory model when using p->parent.
@@ -692,4 +694,19 @@ procdump(void)
     printf("%d %s %s", p->pid, state, p->name);
     printf("\n");
   }
+}
+
+// Return the number of active processes for sysinfo.
+int
+nproc(void)
+{
+    struct proc *p;
+    int count = 0;
+
+    for(p = proc; p < &proc[NPROC]; p++){
+        if(p->state != UNUSED){
+            count++;
+        }
+    }
+    return count;
 }
