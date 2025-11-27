@@ -91,3 +91,20 @@ kalloc(void)
   return (void*)r;
 }
 
+// Returns the number of free bytes of physical memory for sysinfo.
+uint64 
+freemem(void)
+{
+  struct run *r;
+  uint64 freebytes = 0;
+
+  acquire(&kmem.lock);
+  r = kmem.freelist;
+  while(r) {
+      freebytes += PGSIZE; 
+      r = r->next;
+  }
+  release(&kmem.lock);
+
+  return freebytes;
+}

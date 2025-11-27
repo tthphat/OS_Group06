@@ -136,10 +136,12 @@ char*           strncpy(char*, const char*, int);
 // syscall.c
 void            argint(int, int*);
 int             argstr(int, char*, int);
-void            argaddr(int, uint64 *);
+void            argaddr(int, uint64 *); //
 int             fetchstr(uint64, char*, int);
 int             fetchaddr(uint64, uint64*);
 void            syscall();
+uint64          freemem(void);
+
 
 // trap.c
 extern uint     ticks;
