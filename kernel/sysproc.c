@@ -106,6 +106,7 @@ sys_sysinfo(void)
 
     si.freemem = freemem();
     si.nproc = nproc();
+    si.loadavg = compute_loadavg();
 
     if(copyout(p->pagetable, addr, (char*)&si, sizeof(si)) < 0)
         return -1;
