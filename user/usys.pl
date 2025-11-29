@@ -37,3 +37,4 @@ entry("sbrk");
 entry("sleep");
 entry("uptime");
 entry("sysinfo"); # New syscall stub added sysinfo
+entry("trace"); # add trace to entry (user - kernel)

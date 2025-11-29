@@ -24,6 +24,7 @@ int sleep(int);
 int uptime(void);
 struct sysinfo;              // forward declaration sysinfo struct
 int sysinfo(struct sysinfo *);   // New syscall prototype added sysinfo
+int trace(int);
 
 // ulib.c
 int stat(const char*, struct stat*);
