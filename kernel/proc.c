@@ -716,7 +716,7 @@ static uint64 loadavg = 0;
 static int loadavg_samples = 0;
 
 uint64 compute_loadavg(void) {
-    int current_nproc = nproc();   // lấy số tiến trình hiện tại
+    int current_nproc = nproc();   // get the number of currently active processes
     loadavg = (loadavg * loadavg_samples + current_nproc) / (loadavg_samples + 1);
     loadavg_samples++;
     
