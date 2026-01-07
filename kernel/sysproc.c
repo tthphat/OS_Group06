@@ -133,10 +133,9 @@ sys_pgaccess(void)
     int npages;
     uint64 user_mask;
 
-    if (argaddr(0, &start_va) < 0 ||
-        argint(1, &npages) < 0 ||
-        argaddr(2, &user_mask) < 0)
-        return -1;
+    argaddr(0, &start_va);
+    argint(1, &npages);
+    argaddr(2, &user_mask);
 
     if (npages > 64)
         npages = 64;
@@ -153,7 +152,7 @@ sys_pgaccess(void)
 
         if (*pte & PTE_A) {
             mask |= (1L << i);
-            *pte &= ~PTE_A;
+            *pte &= ~PTE_A;   // clear accessed bit
         }
     }
 
