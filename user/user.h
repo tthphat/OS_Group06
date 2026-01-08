@@ -36,7 +36,7 @@ int recv(uint32, uint32*, uint32*, char *, uint32);
 int ugetpid(void);
 uint64 pgpte(void*);
 void kpgtbl(void);
-int pgaccess(void *start_va, int npages, void *mask);
+int pgaccess(void *base, int len, void *mask); // page access prototype
 #endif
 
 // ulib.c
