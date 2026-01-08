@@ -129,22 +129,21 @@ sys_uptime(void)
 int
 sys_pgaccess(void)
 {
-    uint64 start_va;
-    int npages;
+    uint64 base;
+    int len;
     uint64 user_mask;
 
-    argaddr(0, &start_va);
-    argint(1, &npages);
+    argaddr(0, &base);
+    argint(1, &len);
     argaddr(2, &user_mask);
 
-    if (npages > 64)
-        npages = 64;
-
+    if (len > 64)
+        len = 64;
     uint64 mask = 0;
     struct proc *p = myproc();
 
-    for (int i = 0; i < npages; i++) {
-        uint64 va = start_va + i * PGSIZE;
+    for (int i = 0; i < len; i++) {
+        uint64 va = base + i * PGSIZE;
 
         pte_t *pte = walk(p->pagetable, va, 0);
         if (pte == 0)
