@@ -449,3 +449,38 @@ copyinstr(pagetable_t pagetable, char *dst, uint64 srcva, uint64 max)
     return -1;
   }
 }
+
+
+// Helper function to print page table recursively
+void
+vmprint_helper(pagetable_t pagetable, int level)
+{
+  for(int i = 0; i < 512; i++){
+    pte_t pte = pagetable[i];
+    
+    if(pte & PTE_V){
+      // In indent
+      for(int j = 0; j < (3 - level); j++){
+        if(j > 0) printf(" ");
+        printf("..");
+      }
+      
+      uint64 pa = PTE2PA(pte);
+      printf(" %d: pte %p pa %p\n", i, pte, pa);
+      
+      // Đệ quy nếu không phải leaf
+      if(level > 0 && (pte & (PTE_R|PTE_W|PTE_X)) == 0){
+        uint64 child = PTE2PA(pte);
+        vmprint_helper((pagetable_t)child, level - 1);
+      }
+    }
+  }
+}
+
+// Main vmprint function
+void
+vmprint(pagetable_t pagetable)
+{
+  printf("page table %p\n",(void*)pagetable);
+  vmprint_helper(pagetable, 2); // Bắt đầu từ level 2 (root)
+}
