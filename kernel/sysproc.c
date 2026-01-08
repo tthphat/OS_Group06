@@ -74,8 +74,36 @@ sys_sleep(void)
 int
 sys_pgaccess(void)
 {
-  // lab pgtbl: your code here.
-  return 0;
+    uint64 base;
+    int len;
+    uint64 user_mask;
+
+    argaddr(0, &base);
+    argint(1, &len);
+    argaddr(2, &user_mask);
+
+    if (len > 64)
+        len = 64;
+    uint64 mask = 0;
+    struct proc *p = myproc();
+
+    for (int i = 0; i < len; i++) {
+        uint64 va = base + i * PGSIZE;
+
+        pte_t *pte = walk(p->pagetable, va, 0);
+        if (pte == 0)
+            continue;
+
+        if (*pte & PTE_A) {
+            mask |= (1L << i);
+            *pte &= ~PTE_A;   // clear accessed bit
+        }
+    }
+
+    if (copyout(p->pagetable, user_mask, (char *)&mask, sizeof(mask)) < 0)
+        return -1;
+
+    return 0;
 }
 #endif
 
