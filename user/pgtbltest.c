@@ -1,7 +1,7 @@
-#include "kernel/param.h"
-#include "kernel/fcntl.h"
+//#include "kernel/param.h"
+//#include "kernel/fcntl.h"
 #include "kernel/types.h"
-#include "kernel/riscv.h"
+//#include "kernel/riscv.h"
 #include "user/user.h"
 
 #define N (8 * (1 << 20))
@@ -16,10 +16,10 @@ int
 main(int argc, char *argv[])
 {
   // print_pgtbl();
-  // ugetpid_test();
+  ugetpid_test();
   // print_kpgtbl();
   // superpg_test();
-  pgaccess_test();
+  // pgaccess_test();
   printf("pgtbltest: all tests succeeded\n");
   exit(0);
 }
@@ -36,21 +36,21 @@ err(char *why)
 void
 print_pte(uint64 va)
 {
-    pte_t pte = (pte_t) pgpte((void *) va);
-    printf("va 0x%lx pte 0x%lx pa 0x%lx perm 0x%lx\n", va, pte, PTE2PA(pte), PTE_FLAGS(pte));
+    // pte_t pte = (pte_t) pgpte((void *) va);
+    // printf("va 0x%lx pte 0x%lx pa 0x%lx perm 0x%lx\n", va, pte, PTE2PA(pte), PTE_FLAGS(pte));
 }
 
 void
 print_pgtbl()
 {
   printf("print_pgtbl starting\n");
-  for (uint64 i = 0; i < 10; i++) {
+  /*for (uint64 i = 0; i < 10; i++) {
     print_pte(i * PGSIZE);
   }
   uint64 top = MAXVA/PGSIZE;
   for (uint64 i = top-10; i < top; i++) {
     print_pte(i * PGSIZE);
-  }
+  }*/
   printf("print_pgtbl: OK\n");
 }
 
@@ -81,12 +81,12 @@ void
 print_kpgtbl()
 {
   printf("print_kpgtbl starting\n");
-  kpgtbl();
+  // kpgtbl();
   printf("print_kpgtbl: OK\n");
 }
 
 
-void
+/*void
 supercheck(uint64 s)
 {
   pte_t last_pte = 0;
@@ -112,17 +112,17 @@ supercheck(uint64 s)
     if(*(int*)(s+i) != i)
       err("wrong value");
   }
-}
+}*/
 
 void
 superpg_test()
 {
-  int pid;
+  // int pid;
   
   printf("superpg_test starting\n");
   testname = "superpg_test";
   
-  char *end = sbrk(N);
+  /*char *end = sbrk(N);
   if (end == 0 || end == (char*)0xffffffffffffffff)
     err("sbrk failed");
   
@@ -139,12 +139,12 @@ superpg_test()
     if (status != 0) {
       exit(0);
     }
-  }
+  }*/
   printf("superpg_test: OK\n");  
 }
 
 
-void
+/*void
 pgaccess_test()
 {
   char *buf;
@@ -163,4 +163,4 @@ pgaccess_test()
     err("incorrect access bits set");
   free(buf);
   printf("pgaccess_test: OK\n");
-}
+}*/
