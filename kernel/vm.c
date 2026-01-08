@@ -466,7 +466,7 @@ vmprint_helper(pagetable_t pagetable, int level)
       }
       
       uint64 pa = PTE2PA(pte);
-      printf(" %d: pte %p pa %p\n", i, pte, pa);
+      printf(" %d: pte %p pa %p\n", i, (void*)pte, (void*)pa);
       
       // Đệ quy nếu không phải leaf
       if(level > 0 && (pte & (PTE_R|PTE_W|PTE_X)) == 0){
