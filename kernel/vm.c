@@ -486,11 +486,43 @@ copyinstr(pagetable_t pagetable, char *dst, uint64 srcva, uint64 max)
   }
 }
 
+void
+vmprint_helper(pagetable_t pagetable, int level)
+{
+  // Level: 2 (root) -> 1 (middle) -> 0 (leaf)
+  
+  // Duyệt qua 512 entries
+  for(int i = 0; i < 512; i++){
+    pte_t pte = pagetable[i];
+    
+    // Chỉ in PTE valid
+    if(pte & PTE_V){
+      // In indent theo level: ".." cho mỗi level
+      for(int j = 0; j <= (2 - level); j++){
+        printf("..");
+	      if (level < 2 && j != 2 - level)
+	        printf(" ");
+      }
+      
+      // In index, pte value, physical address
+      uint64 pa = PTE2PA(pte);
+      printf("%d: pte %p pa %p\n", i, (void*)pte,(void*)pa);
+      
+      // Nếu không phải leaf (R=W=X=0), đệ quy xuống level tiếp theo
+      if(level > 0 && (pte & (PTE_R|PTE_W|PTE_X)) == 0){
+        // Đây là pointer tới page table con
+        uint64 child = PTE2PA(pte);
+        vmprint_helper((pagetable_t)child, level - 1);
+      }
+    }
+  }
+}
 
 #ifdef LAB_PGTBL
 void
 vmprint(pagetable_t pagetable) {
-  // your code here
+  printf("page table %p\n",(void*)pagetable);
+  vmprint_helper(pagetable, 2); // Bắt đầu từ level 2 (root)
 }
 #endif
 
