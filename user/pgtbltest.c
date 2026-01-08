@@ -15,11 +15,11 @@ void pgaccess_test();
 int
 main(int argc, char *argv[])
 {
-  // print_pgtbl();
+  print_pgtbl();
   ugetpid_test();
-  // print_kpgtbl();
-  // superpg_test();
-  // pgaccess_test();
+  print_kpgtbl();
+  superpg_test();
+  pgaccess_test();
   printf("pgtbltest: all tests succeeded\n");
   exit(0);
 }
