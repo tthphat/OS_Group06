@@ -1,0 +1,207 @@
+diff --git a/kernel/defs.h b/kernel/defs.h
+index 82d9a86..a3c962b 100644
+--- a/kernel/defs.h
++++ b/kernel/defs.h
+@@ -173,7 +173,7 @@ uint64          walkaddr(pagetable_t, uint64);
+ int             copyout(pagetable_t, uint64, char *, uint64);
+ int             copyin(pagetable_t, char *, uint64, uint64);
+ int             copyinstr(pagetable_t, char *, uint64, uint64);
+-void  		    vmprint(pagetable_t); 
++
+ // plic.c
+ void            plicinit(void);
+ void            plicinithart(void);
+diff --git a/kernel/exec.c b/kernel/exec.c
+index 00465d2..e18bbb6 100644
+--- a/kernel/exec.c
++++ b/kernel/exec.c
+@@ -120,8 +120,6 @@ exec(char *path, char **argv)
+       last = s+1;
+   safestrcpy(p->name, last, sizeof(p->name));
+     
+-    
+-  
+   // Commit to the user image.
+   oldpagetable = p->pagetable;
+   p->pagetable = pagetable;
+@@ -129,10 +127,7 @@ exec(char *path, char **argv)
+   p->trapframe->epc = elf.entry;  // initial program counter = main
+   p->trapframe->sp = sp; // initial stack pointer
+   proc_freepagetable(oldpagetable, oldsz);
+-  
+-  if(p->pid == 1)
+-    vmprint(p->pagetable);
+-    
++
+   return argc; // this ends up in a0, the first argument to main(argc, argv)
+ 
+  bad:
+diff --git a/kernel/proc.c b/kernel/proc.c
+index 462575f..58a8a0b 100644
+--- a/kernel/proc.c
++++ b/kernel/proc.c
+@@ -132,14 +132,6 @@ found:
+     return 0;
+   }
+ 
+-  // Allocate and init a usyscall page 
+-  if((p->usyscall = (struct usyscall *)kalloc()) == 0) {
+-    freeproc(p);
+-    release(&p->lock);
+-    return 0; 
+-  }
+-  p->usyscall->pid = p->pid;
+-
+   // An empty user page table.
+   p->pagetable = proc_pagetable(p);
+   if(p->pagetable == 0){
+@@ -166,11 +158,6 @@ freeproc(struct proc *p)
+   if(p->trapframe)
+     kfree((void*)p->trapframe);
+   p->trapframe = 0;
+-
+-  if(proc->usyscall)
+-    kfree((void *) p->usyscall);
+-  p->usyscall = 0;
+-
+   if(p->pagetable)
+     proc_freepagetable(p->pagetable, p->sz);
+   p->pagetable = 0;
+@@ -215,13 +202,6 @@ proc_pagetable(struct proc *p)
+     return 0;
+   }
+ 
+-  if(mappages(pagetable, USYSCALL, PGSIZE, (uint64)(p->usyscall), PTE_R | PTE_U) < 0) {
+-    uvmunmap(pagetable, TRAMPOLINE, 1, 0);
+-    uvmunmap(pagetable, TRAPFRAME, 1, 0);
+-    uvmfree(pagetable, 0);
+-    return 0;
+-  }
+-
+   return pagetable;
+ }
+ 
+@@ -232,7 +212,6 @@ proc_freepagetable(pagetable_t pagetable, uint64 sz)
+ {
+   uvmunmap(pagetable, TRAMPOLINE, 1, 0);
+   uvmunmap(pagetable, TRAPFRAME, 1, 0);
+-  uvmunmap(pagetable, USYSCALL, 1, 0); // unmap USYSCALL
+   uvmfree(pagetable, sz);
+ }
+ 
+diff --git a/kernel/proc.h b/kernel/proc.h
+index a0fcf72..d021857 100644
+--- a/kernel/proc.h
++++ b/kernel/proc.h
+@@ -104,6 +104,4 @@ struct proc {
+   struct file *ofile[NOFILE];  // Open files
+   struct inode *cwd;           // Current directory
+   char name[16];               // Process name (debugging)
+-
+-  struct usyscall *usyscall; // read-only for user
+ };
+diff --git a/kernel/riscv.h b/kernel/riscv.h
+index 2efbc21..20a01db 100644
+--- a/kernel/riscv.h
++++ b/kernel/riscv.h
+@@ -16,7 +16,6 @@ r_mhartid()
+ #define MSTATUS_MPP_S (1L << 11)
+ #define MSTATUS_MPP_U (0L << 11)
+ #define MSTATUS_MIE (1L << 3)    // machine-mode interrupt enable.
+-#define PTE_A (1L << 6) // page accessed
+ 
+ static inline uint64
+ r_mstatus()
+diff --git a/kernel/sysproc.c b/kernel/sysproc.c
+index fa31e6a..88644b2 100644
+--- a/kernel/sysproc.c
++++ b/kernel/sysproc.c
+@@ -74,36 +74,8 @@ sys_sleep(void)
+ int
+ sys_pgaccess(void)
+ {
+-    uint64 base;
+-    int len;
+-    uint64 user_mask;
+-
+-    argaddr(0, &base);
+-    argint(1, &len);
+-    argaddr(2, &user_mask);
+-
+-    if (len > 64)
+-        len = 64;
+-    uint64 mask = 0;
+-    struct proc *p = myproc();
+-
+-    for (int i = 0; i < len; i++) {
+-        uint64 va = base + i * PGSIZE;
+-
+-        pte_t *pte = walk(p->pagetable, va, 0);
+-        if (pte == 0)
+-            continue;
+-
+-        if (*pte & PTE_A) {
+-            mask |= (1L << i);
+-            *pte &= ~PTE_A;   // clear accessed bit
+-        }
+-    }
+-
+-    if (copyout(p->pagetable, user_mask, (char *)&mask, sizeof(mask)) < 0)
+-        return -1;
+-
+-    return 0;
++  // lab pgtbl: your code here.
++  return 0;
+ }
+ #endif
+ 
+@@ -127,4 +99,4 @@ sys_uptime(void)
+   xticks = ticks;
+   release(&tickslock);
+   return xticks;
+-}
+\ No newline at end of file
++}
+diff --git a/kernel/vm.c b/kernel/vm.c
+index 17f48ab..5c31e87 100644
+--- a/kernel/vm.c
++++ b/kernel/vm.c
+@@ -449,38 +449,3 @@ copyinstr(pagetable_t pagetable, char *dst, uint64 srcva, uint64 max)
+     return -1;
+   }
+ }
+-
+-
+-// Helper function to print page table recursively
+-void
+-vmprint_helper(pagetable_t pagetable, int level)
+-{
+-  for(int i = 0; i < 512; i++){
+-    pte_t pte = pagetable[i];
+-    
+-    if(pte & PTE_V){
+-      // In indent
+-      for(int j = 0; j < (3 - level); j++){
+-        if(j > 0) printf(" ");
+-        printf("..");
+-      }
+-      
+-      uint64 pa = PTE2PA(pte);
+-      printf(" %d: pte %p pa %p\n", i, (void*)pte, (void*)pa);
+-      
+-      // Đệ quy nếu không phải leaf
+-      if(level > 0 && (pte & (PTE_R|PTE_W|PTE_X)) == 0){
+-        uint64 child = PTE2PA(pte);
+-        vmprint_helper((pagetable_t)child, level - 1);
+-      }
+-    }
+-  }
+-}
+-
+-// Main vmprint function
+-void
+-vmprint(pagetable_t pagetable)
+-{
+-  printf("page table %p\n",(void*)pagetable);
+-  vmprint_helper(pagetable, 2); // Bắt đầu từ level 2 (root)
+-}
