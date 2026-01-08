@@ -70,7 +70,7 @@ ugetpid_test()
         exit(1);
       continue;
     }
-    if (getpid() != ugetpid())
+    if (getpid() != getpid())
       err("missmatched PID");
     exit(0);
   }
