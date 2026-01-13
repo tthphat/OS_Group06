@@ -132,8 +132,9 @@ found:
     return 0;
   }
 
+  p->usyscall = (struct usyscall *)kalloc();
   // Allocate and init a usyscall page 
-  if((p->usyscall = (struct usyscall *)kalloc()) == 0) {
+  if((p->usyscall == 0) {
     freeproc(p);
     release(&p->lock);
     return 0; 
@@ -167,10 +168,10 @@ freeproc(struct proc *p)
     kfree((void*)p->trapframe);
   p->trapframe = 0;
 
-  if(proc->usyscall)
+  if(proc->usyscall) {
     kfree((void *) p->usyscall);
-  p->usyscall = 0;
-
+    p->usyscall = 0;
+  }
   if(p->pagetable)
     proc_freepagetable(p->pagetable, p->sz);
   p->pagetable = 0;
