@@ -23,10 +23,10 @@ int main(void)
 
     if (pid == 0) {
         // --- Child ---
-        close(p_parent_to_child[1]); // dong dau ghi
-        close(p_child_to_parent[0]); // dong dau doc
+        close(p_parent_to_child[1]); // Child đóng đầu ghi của pipe parent → child. Child không ghi vào pipe này, nên đóng đầu ghi của NÓ
+        close(p_child_to_parent[0]); // Child đóng đầu đọc của pipe child → parent. Child chỉ ghi, không đọc pipe này
 
-        // Doc 1 byte tu parent
+        // Đọc 1 byte từ parent
         if (read(p_parent_to_child[0], &buf, 1) != 1) {
             exit(1);
         }
