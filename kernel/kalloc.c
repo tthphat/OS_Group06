@@ -95,16 +95,16 @@ kalloc(void)
 uint64 
 freemem(void)
 {
-  struct run *r;
-  uint64 freebytes = 0;
+  struct run *r; // Mỗi run đại diện cho 1 page vật lý trống (4KB). con trỏ duyệt danh sách free pages
+  uint64 freebytes = 0; // Số byte bộ nhớ vật lý trống
 
-  acquire(&kmem.lock);
-  r = kmem.freelist;
-  while(r) {
-      freebytes += PGSIZE; 
+  acquire(&kmem.lock);// Khóa bộ nhớ, nếu không lock page có thể bị cấp phát / thu hồi trong lúc đang đếm
+  r = kmem.freelist; // Lấy danh sách free pages
+  while(r) { // Duyệt từng page trống
+      freebytes += PGSIZE;  // Mỗi node run = 1 page = 4096 bytes, cộng dồn vào tổng  
       r = r->next;
   }
-  release(&kmem.lock);
+  release(&kmem.lock);// Mở khóa bộ nhớ sau khi đếm xong
 
   return freebytes;
 }

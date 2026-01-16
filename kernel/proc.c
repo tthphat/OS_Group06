@@ -701,11 +701,11 @@ procdump(void)
 int
 nproc(void)
 {
-    struct proc *p;
-    int count = 0;
+    struct proc *p; // p → con trỏ duyệt process table
+    int count = 0; // count → số tiến trình hợp lệ
 
     for(p = proc; p < &proc[NPROC]; p++){
-        if(p->state != UNUSED){
+        if(p->state != UNUSED){ // Nếu trạng thái khác UNUSED thì tiến trình hợp lệ
             count++;
         }
     }

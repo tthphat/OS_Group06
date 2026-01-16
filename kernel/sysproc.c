@@ -118,11 +118,11 @@ uint64
 sys_trace(void)
 {
   int trace_mask;
-  argint(0, &trace_mask);
-  if(trace_mask < 0) {
-    return -1;
+  argint(0, &trace_mask); // lấy tham số trace_mask từ người dùng
+  if(trace_mask < 0) {// Bitmask âm là vô nghĩa
+    return -1; 
   }
-  struct proc *p = myproc();
+  struct proc *p = myproc(); // Kernel đang chạy syscall của process nào Trả về struct proc của process đó
   p->mask = trace_mask;
   return 0;
 }
