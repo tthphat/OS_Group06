@@ -4,6 +4,8 @@
 #include "kernel/fs.h"
 #include "kernel/fcntl.h"
 
+//max 16 file descriptor per process : #define NOFILE 16 // at kernel/param.h
+
 void
 find(char* path, char* name) {
     char buf[512], *p;
@@ -29,6 +31,7 @@ find(char* path, char* name) {
     switch(st.type){
     case T_DEVICE: // không dừng nếu không có break, nên cũng sẽ print
     case T_FILE:
+        if(strcmp(de.name, name) == 0) // compare file name
             printf("%s\n", path);
         break;
 
