@@ -74,11 +74,11 @@ sys_sleep(void)
 int
 sys_pgaccess(void)
 {
-    uint64 base;
-    int len;
-    uint64 user_mask;
+    uint64 base; // địa chỉ ảo bắt đầu
+    int len; // số trang cần kiểm tra
+    uint64 user_mask; // địa chỉ người dùng để lưu kết quả mặt nạ
 
-    argaddr(0, &base);
+    argaddr(0, &base); // lấy argument
     argint(1, &len);
     argaddr(2, &user_mask);
 
@@ -88,20 +88,28 @@ sys_pgaccess(void)
     struct proc *p = myproc();
 
     for (int i = 0; i < len; i++) {
-        uint64 va = base + i * PGSIZE;
+        uint64 va = base + i * PGSIZE; // mỗi trang cách nhau PGSIZE = 4096 bytes
 
-        pte_t *pte = walk(p->pagetable, va, 0);
+        pte_t *pte = walk(p->pagetable, va, 0); 
+        // Hàm walk dùng để tìm PTE (Page Table Entry) tương ứng với địa chỉ ảo (va)
+        // | -------------- | ---------------------------------- |
+        // | `p->pagetable` | page table của process             |
+        // | `va`           | virtual address                    |
+        // | `0`            | **không tạo mới** nếu chưa tồn tại |
+
+        // walk() trả về: pte_t* nếu tồn tại, 0 nếu page chưa map
+
         if (pte == 0)
             continue;
 
         if (*pte & PTE_A) {
-            mask |= (1L << i);
-            *pte &= ~PTE_A;   // clear accessed bit
+            mask |= (1L << i); // dịch trái bit số 1 sang vị trí thứ i
+            *pte &= ~PTE_A;   // clear accessed bit. bitwise NOT đảo tất cả bit, mọi bit = 1, trừ bit Accessed = 0
         }
     }
 
-    if (copyout(p->pagetable, user_mask, (char *)&mask, sizeof(mask)) < 0)
-        return -1;
+    if (copyout(p->pagetable, user_mask, (char *)&mask, sizeof(mask)) < 0) // user_mask là địa chỉ ảo user, kernel không được phép truy cập trực tiếp
+        return -1; // Page table của process hiện tại
 
     return 0;
 }
@@ -111,7 +119,7 @@ uint64
 sys_kill(void)
 {
   int pid;
-
+     
   argint(0, &pid);
   return kill(pid);
 }
