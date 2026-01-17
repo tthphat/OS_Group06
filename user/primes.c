@@ -31,7 +31,7 @@ void primes(int read_fd) {
         exit(1);
     }
 
-    if (pid == 0) {
+    if (pid == 0) { // tien trình con
         close(newpipe[1]);
         close(read_fd);
         primes(newpipe[0]);
