@@ -141,6 +141,12 @@ void testbad() {
   }
 }
 
+void printAvg(){
+  struct sysinfo info;
+  sinfo(&info);
+  printf("Load Average: %ld\n", info.loadavg);
+}
+
 int
 main(int argc, char *argv[])
 {
@@ -148,6 +154,7 @@ main(int argc, char *argv[])
   testcall();
   testmem();
   testproc();
+  printAvg();
   printf("sysinfotest: OK\n");
   exit(0);
 }
