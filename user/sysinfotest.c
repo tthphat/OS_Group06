@@ -50,7 +50,7 @@ testmem() {
     exit(1);
   }
   
-  if((uint64)sbrk(PGSIZE) == 0xffffffffffffffff){
+  if((uint64)sbrk(PGSIZE) == 0xffffffffffffffff){ // cap phat them 1 page
     printf("sbrk failed");
     exit(1);
   }
@@ -62,7 +62,7 @@ testmem() {
     exit(1);
   }
   
-  if((uint64)sbrk(-PGSIZE) == 0xffffffffffffffff){
+  if((uint64)sbrk(-PGSIZE) == 0xffffffffffffffff){ // giai phong 1 page
     printf("sbrk failed");
     exit(1);
   }
