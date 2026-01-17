@@ -114,7 +114,7 @@ void testproc() {
   }
   wait(&status);
   sinfo(&info);
-  if(info.nproc != nproc) {
+  if(info.nproc != nproc) { // process con kết thúc, tìn nproc phải quay về ban đầu
       printf("sysinfotest: FAIL nproc is %ld instead of %ld\n", info.nproc, nproc);
       exit(1);
   }

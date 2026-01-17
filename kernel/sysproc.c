@@ -108,7 +108,7 @@ sys_sysinfo(void)
     si.nproc = nproc();
     si.loadavg = compute_loadavg();
 
-    if(copyout(p->pagetable, addr, (char*)&si, sizeof(si)) < 0)
+    if(copyout(p->pagetable, addr, (char*)&si, sizeof(si)) < 0) // kernel KHÔNG ĐƯỢC PHÉP ghi trực tiếp vào địa chỉ do user đưa vào.
         return -1;
 
     return 0;

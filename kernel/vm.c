@@ -391,16 +391,16 @@ copyout(pagetable_t pagetable, uint64 dstva, char *src, uint64 len)
 
   while(len > 0){
     va0 = PGROUNDDOWN(dstva);
-    if (va0 >= MAXVA)
+    if (va0 >= MAXVA) // kiểm tra địa chỉ có thuộc user space không.
       return -1;
-    if((pte = walk(pagetable, va0, 0)) == 0) {
+    if((pte = walk(pagetable, va0, 0)) == 0) { // kiểm tra PTE có tồn tại không
       // printf("copyout: pte should exist 0x%x %d\n", dstva, len);
       return -1;
     }
 
 
     // forbid copyout over read-only user text pages.
-    if((*pte & PTE_W) == 0)
+    if((*pte & PTE_W) == 0) // Kiểm tra quyền ghi
       return -1;
     
     pa0 = walkaddr(pagetable, va0);
